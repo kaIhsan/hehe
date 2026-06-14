@@ -1,83 +1,95 @@
 # ERD Klasik — Sistem Reservasi Restoran
 
-Entity Relationship Diagram (ERD) bergaya klasik untuk sistem manajemen reservasi restoran menggunakan **Chen Notation** dengan simbol utama: entitas (persegi panjang), atribut (elips), relasi (berlian), dan kardinalitas (1, M, N).
-
----
-
-## Daftar Isi
-
-- [Gambaran Umum](#gambaran-umum)
-- [Diagram ERD Klasik](#diagram-erd-klasik)
-- [Struktur Entitas](#struktur-entitas)
-- [Relasi Antar Entitas](#relasi-antar-entitas)
-- [Simbol ERD yang Digunakan](#simbol-erd-yang-digunakan)
-
----
-
-## Gambaran Umum
-
-Sistem ini dirancang untuk mengelola proses reservasi meja di restoran, mencakup:
-
-- Manajemen **pengguna** (admin dan member)
-- Pengelolaan **menu** berdasarkan kategori
-- Pencatatan **reservasi** oleh pelanggan
-- Detail pesanan menu per reservasi melalui **detail_reservasi**
+Entity Relationship Diagram (ERD) bergaya klasik menggunakan **Chen Notation** dengan simbol: entitas (persegi panjang), atribut (elips/oval), relasi (berlian), dan kardinalitas (1, M, N).
 
 ---
 
 ## Diagram ERD Klasik
 
-> Diagram ERD menggunakan **Chen Notation** dengan kardinalitas `1`, `M`, dan `N` pada setiap garis relasi.
-
 ```mermaid
-erDiagram
-    USERS {
-        int Id_nama PK
-        varchar nama
-        varchar Username
-        varchar password
-        enum role
-        timestamp created_at
-    }
+graph TD
 
-    KATEGORI_MENU {
-        int id PK
-        varchar nama_kategori
-    }
+%% DEKLARASI ENTITAS (Persegi Panjang)
+Users[Users]
+Reservasi[Reservasi]
+Kategori[Kategori_menu]
+Menu[Menu]
+Detail[Detail_reservasi]
 
-    MENU {
-        int id PK
-        varchar nama_menu
-        int Kategori_id FK
-        int harga
-        text deskripsi
-        tinyint tersedia
-    }
+%% DEKLARASI RELASI (Belah Ketupat / Berlian)
+R_Membuat{membuat}
+R_Klasifikasi{mengklasifikasi}
+R_Memiliki{memiliki}
+R_Termasuk{termasuk dalam}
 
-    RESERVASI {
-        int Id_reservasi PK
-        int User_id FK
-        varchar nama_pemesan
-        int No_hp
-        int Jumlah_orang
-        int total_harga
-        date tanggal
-        time Jam_reservasi
-        enum status
-    }
+%% -----------------------------------------------------
+%% ATRIBUT & PENGHUBUNG ATRIBUT KE ENTITAS (Oval)
+%% -----------------------------------------------------
 
-    DETAIL_RESERVASI {
-        int Id_detail PK
-        int Id_reservasi FK
-        int Id_menu FK
-        int Jumlah_pesanan
-        decimal subtotal
-    }
+%% Atribut Users
+u1([<u>Id_nama</u>])
+u2([nama])
+u3([Username])
+u4([password])
+u5([role])
+u6([created_at])
+Users --- u1 & u2 & u3 & u4 & u5 & u6
 
-    USERS ||--o{ RESERVASI : "membuat (1 : M)"
-    RESERVASI ||--|{ DETAIL_RESERVASI : "memiliki (1 : N)"
-    MENU ||--o{ DETAIL_RESERVASI : "termasuk dalam (1 : N)"
-    KATEGORI_MENU ||--o{ MENU : "mengklasifikasi (1 : N)"
+%% Atribut Kategori_menu
+k1([<u>id</u>])
+k2([nama_kategori])
+Kategori --- k1 & k2
+
+%% Atribut Menu
+m1([<u>id</u>])
+m2([nama_menu])
+m3([harga])
+m4([deskripsi])
+m5([tersedia])
+Menu --- m1 & m2 & m3 & m4 & m5
+
+%% Atribut Reservasi
+r1([<u>Id_reservasi</u>])
+r2([nama_pemesan])
+r3([Jumlah_orang])
+r4([tanggal])
+r5([Jam_reservasi])
+r6([No_hp])
+r7([total_harga])
+r8([status])
+Reservasi --- r1 & r2 & r3 & r4 & r5 & r6 & r7 & r8
+
+%% Atribut Detail_reservasi
+d1([<u>Id_detail</u>])
+d2([Jumlah_pesanan])
+d3([subtotal])
+Detail --- d1 & d2 & d3
+
+%% -----------------------------------------------------
+%% HUBUNGAN ANTAR ENTITAS & KARDINALITAS
+%% -----------------------------------------------------
+Users ---|1| R_Membuat
+R_Membuat ---|M| Reservasi
+
+Kategori ---|1| R_Klasifikasi
+R_Klasifikasi ---|N| Menu
+
+Reservasi ---|1| R_Memiliki
+R_Memiliki ---|N| Detail
+
+Menu ---|1| R_Termasuk
+R_Termasuk ---|N| Detail
+
+%% -----------------------------------------------------
+%% STYLING
+%% -----------------------------------------------------
+classDef entitas fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+classDef relasi  fill:#ede7f6,stroke:#4527a0,stroke-width:2px;
+classDef atribut fill:#e0f2f1,stroke:#00695c,stroke-width:1px;
+
+class Users,Reservasi,Kategori,Menu,Detail entitas;
+class R_Membuat,R_Klasifikasi,R_Memiliki,R_Termasuk relasi;
+class u1,u2,u3,u4,u5,u6,k1,k2,m1,m2,m3,m4,m5,r1,r2,r3,r4,r5,r6,r7,r8,d1,d2,d3 atribut;
 ```
 
 ---
@@ -85,8 +97,6 @@ erDiagram
 ## Struktur Entitas
 
 ### 1. Tabel `users`
-
-Menyimpan data pengguna sistem (admin maupun member).
 
 | Kolom | Tipe Data | Keterangan |
 |---|---|---|
@@ -101,8 +111,6 @@ Menyimpan data pengguna sistem (admin maupun member).
 
 ### 2. Tabel `kategori_menu`
 
-Menyimpan jenis atau kategori dari menu yang tersedia.
-
 | Kolom | Tipe Data | Keterangan |
 |---|---|---|
 | `id` *(PK)* | INT, AUTO_INCREMENT | Primary Key |
@@ -112,13 +120,11 @@ Menyimpan jenis atau kategori dari menu yang tersedia.
 
 ### 3. Tabel `menu`
 
-Menyimpan daftar makanan dan minuman yang ditawarkan restoran.
-
 | Kolom | Tipe Data | Keterangan |
 |---|---|---|
 | `id` *(PK)* | INT, AUTO_INCREMENT | Primary Key |
 | `nama_menu` | VARCHAR(100) | Nama makanan / minuman |
-| `Kategori_id` *(FK)* | INT(11) | Foreign Key → `kategori_menu.id` |
+| `Kategori_id` *(FK)* | INT(11) | Foreign Key ke kategori_menu.id |
 | `harga` | INT(11) | Harga produk |
 | `deskripsi` | TEXT | Deskripsi item menu |
 | `tersedia` | TINYINT(1) | Ketersediaan produk (1 = tersedia) |
@@ -127,12 +133,10 @@ Menyimpan daftar makanan dan minuman yang ditawarkan restoran.
 
 ### 4. Tabel `reservasi`
 
-Menyimpan data reservasi yang dibuat oleh pelanggan.
-
 | Kolom | Tipe Data | Keterangan |
 |---|---|---|
 | `Id_reservasi` *(PK)* | INT | Primary Key |
-| `User_id` *(FK)* | INT(11) | Foreign Key → `users.Id_nama` |
+| `User_id` *(FK)* | INT(11) | Foreign Key ke users.Id_nama |
 | `nama_pemesan` | VARCHAR(100) | Nama pelanggan pemesan |
 | `No_hp` | INT(11) | Nomor handphone pemesan |
 | `Jumlah_orang` | INT, DEFAULT 1 | Jumlah orang yang datang |
@@ -145,13 +149,11 @@ Menyimpan data reservasi yang dibuat oleh pelanggan.
 
 ### 5. Tabel `detail_reservasi`
 
-Menyimpan detail item menu yang dipesan dalam satu reservasi.
-
 | Kolom | Tipe Data | Keterangan |
 |---|---|---|
 | `Id_detail` *(PK)* | INT, AUTO_INCREMENT | Primary Key |
-| `Id_reservasi` *(FK)* | INT(11) | Foreign Key → `reservasi.Id_reservasi` |
-| `Id_menu` *(FK)* | INT(11) | Foreign Key → `menu.id` |
+| `Id_reservasi` *(FK)* | INT(11) | Foreign Key ke reservasi.Id_reservasi |
+| `Id_menu` *(FK)* | INT(11) | Foreign Key ke menu.id |
 | `Jumlah_pesanan` | INT(11) | Jumlah item yang dipesan |
 | `subtotal` | DECIMAL(10,2) | Total harga per item pesanan |
 
@@ -161,21 +163,19 @@ Menyimpan detail item menu yang dipesan dalam satu reservasi.
 
 | Relasi | Entitas Asal | Kardinalitas | Entitas Tujuan | Keterangan |
 |---|---|---|---|---|
-| membuat | `users` | **1 : M** | `reservasi` | Satu user dapat membuat banyak reservasi |
-| memiliki | `reservasi` | **1 : N** | `detail_reservasi` | Satu reservasi memiliki banyak detail pesanan |
-| termasuk dalam | `menu` | **1 : N** | `detail_reservasi` | Satu menu dapat muncul di banyak detail reservasi |
-| mengklasifikasi | `kategori_menu` | **1 : N** | `menu` | Satu kategori mencakup banyak item menu |
+| membuat | `users` | **1 : M** | `reservasi` | Satu user membuat banyak reservasi |
+| mengklasifikasi | `kategori_menu` | **1 : N** | `menu` | Satu kategori mencakup banyak menu |
+| memiliki | `reservasi` | **1 : N** | `detail_reservasi` | Satu reservasi memiliki banyak detail |
+| termasuk dalam | `menu` | **1 : N** | `detail_reservasi` | Satu menu muncul di banyak detail reservasi |
 
 ---
 
 ## Simbol ERD yang Digunakan
 
-| Simbol | Bentuk | Notasi Mermaid | Fungsi |
-|---|---|---|---|
-| Entitas | Persegi panjang `□` | Nama tabel dalam blok `{}` | Objek utama dalam sistem |
-| Atribut PK | Elips garis bawah `<u>attr</u>` | Suffix `PK` pada kolom | Menandai Primary Key |
-| Atribut FK | Elips biasa | Suffix `FK` pada kolom | Menandai Foreign Key |
-| Relasi | Belah ketupat `◇` | Label pada garis relasi | Nama hubungan antar entitas |
-| Kardinalitas 1:1 | `\|\|──\|\|` | `\|\|--\|\|` | Satu ke satu |
-| Kardinalitas 1:M | `\|\|──<{` | `\|\|--o{` | Satu ke banyak (opsional) |
-| Kardinalitas 1:N | `\|\|──{\|` | `\|\|--\|{` | Satu ke banyak (wajib ada) |
+| Simbol | Sintaks Mermaid | Keterangan |
+|---|---|---|
+| Entitas | `Nama[Nama]` | Persegi panjang |
+| Relasi | `Nama{Nama}` | Belah ketupat / berlian |
+| Atribut | `Nama([Nama])` | Oval / elips |
+| Atribut PK | `Nama([<u>Nama</u>])` | Oval dengan garis bawah |
+| Kardinalitas | `---|1|`, `---|M|`, `---|N|` | Label pada garis penghubung |
